@@ -6,8 +6,20 @@
 # 
 #    http://shiny.rstudio.com/
 #
-setwd("~/ST_project_information/ST_project_information/")
-source("load_libraries.R")
+#setwd("~/ST_project_information/")
+#source("load_libraries.R")
+
+
+require("googlesheets")
+require("tidyr")
+require("zoo")
+require("shiny")
+require("shinydashboard")
+require("scales")
+require("devtools")
+require("Cairo")
+require("plotly")
+require("ggplot2")
 
 header <- dashboardHeader(title = "ST Project Information"
                           )

@@ -6,13 +6,26 @@
 # 
 #    http://shiny.rstudio.com/
 #
-setwd("~/ST_project_information/ST_project_information/")
-source("load_libraries.R")
+#setwd("~/ST_project_information/")
+#source("load_libraries.R")
+
+
+require("googlesheets")
+require("tidyr")
+require("zoo")
+require("shiny")
+require("shinydashboard")
+require("scales")
+require("devtools")
+require("Cairo")
+require("plotly")
+require("ggplot2")
+
 
 ST <- gs_title("ST Project Information")
 
 give.n <- function(x){
-  return(c(y = median(x)*0.0, label = length(x))) 
+  return(c(y = max(median(x)*-1.0,-1000000), label = length(x))) 
   # experiment with the multiplier to find the perfect position
 }
 
