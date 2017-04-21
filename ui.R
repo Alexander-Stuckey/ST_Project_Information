@@ -62,10 +62,6 @@ body <- dashboardBody(
       fluidRow(
         box(title = "Scatterplots", width = "auto",
           fluidRow(
-            #column(width=3,box(width = "auto", uiOutput("splot_y"))),
-            #column(width=3,box(width = "auto", uiOutput("splot_x"))),
-            #column(width=3,box(width = "auto", uiOutput("splot_col"))),
-            #column(width=3,box(width = "auto", uiOutput("splot_shape"))),
             box(width = 4, column(width = 12, uiOutput("splot_y")), column(width = 12, uiOutput("splot_x"))),
             box(width = 4, column(width = 12, uiOutput("splot_col")), column(width = 12, uiOutput("splot_shape"))),
             box(width = 4, column(width = 12, uiOutput("splot_norm_check")), column(width = 12, uiOutput("splot_norm")), column(width = 12, uiOutput("splot_norm_scale")))
@@ -80,10 +76,12 @@ body <- dashboardBody(
           fluidRow(
             column(width = 4, box(width = "auto", uiOutput("bandwplot_factor"))),
             column(width = 4, box(width = "auto", uiOutput("bandwplot_data"))),
-            column(width = 4, box(width = "auto", uiOutput("bandwplot_col")))
+            column(width = 4, box(width = "auto", uiOutput("bandwplot_col")), box(width = "auto", uiOutput("bandwplot_usecol")))
           ),
           fluidRow(
-            box(width = "auto", plotlyOutput("bandwplot"))
+            box(width = "auto", plotlyOutput("bandwplot")),
+            box(width = "auto", column(width = 12, box(width = 6, title = "Number of observations", tableOutput("factor_table")), 
+                                       box(width = 6, title = "TukeyHSD showing significant differences between comparisons", tableOutput("factor_anova"))))
           )
         )
       )

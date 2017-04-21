@@ -25,7 +25,7 @@ require("ggplot2")
 ST <- gs_title("ST Project Information")
 
 give.n <- function(x){
-  return(c(y = max(median(x)*-1.0,-1000000), label = length(x))) 
+  return(c(y = 0, label = length(x))) 
   # experiment with the multiplier to find the perfect position
 }
 
@@ -36,7 +36,11 @@ shinyServer(function(input, output) {
   st_info <- gs_read(ss=ST, ws="Sheet1", skip=12)
   st_data_sheet <- as.data.frame(st_info)
   st_data_sheet <- na.locf(st_data_sheet)
+  st_data_sheet[st_data_sheet == "-"] = NA
   st_data_sheet[,1] <- as.character(as.Date(st_data_sheet[,1], "%y/%m/%d"))
+  
+  #Don't require complete rows at the moment
+  #st_data_sheet <- st_data_sheet[complete.cases(st_data_sheet),]
   
   observeEvent(input$refresh_data, {
     st_info <<- gs_read(ss=ST, ws="Sheet1", skip=12)
@@ -81,7 +85,7 @@ shinyServer(function(input, output) {
     shape_ <- as.factor(unlist(subset(st_data_sheet, select = input$sctplot_shape)))
     norm_ <- as.numeric(unlist(subset(st_data_sheet, select = input$splot_norm)))
     norm_scale <- as.numeric(input$splot_norm_scale)
-    splot_title <- paste("Scatterplot of ", input$sctplot_x, " againt ", input$sctplot_y, ".", sep="")
+    splot_title <- paste("Scatterplot of ", input$sctplot_x, " against ", input$sctplot_y, ".", sep="")
     
     sploty_value <- switch(input$splot_norm_check,
                            no = value1,
@@ -94,11 +98,15 @@ shinyServer(function(input, output) {
                            y = value2,
                            x_y = (value2/norm_)*norm_scale)
     
-    splot_data <- aes(x=splotx_value,y=sploty_value, shape = shape_, color = colour)
+    splot_data <- aes(x=splotx_value,y=sploty_value, shape = shape_, color = colour, 
+                      text = paste("Array Batch: ", `Array Batch`,  "\nArray: ", `Array Lot Number`, "\nWell: ", `Well Position`, 
+                                   "\nTissue Type: ", `Tissue Type`, "\nPerson: ", `Person` , "\n", input$sctplot_y, ": ", sploty_value,
+                                   "\n", input$sctplot_x, ": ", splotx_value, sep = ""))
+    
     scatterplot <- ggplot(st_data_sheet, splot_data) + geom_point() + labs(colour = input$sctplot_col, shape = input$sctplot_shape) + 
       xlab(input$sctplot_x) + ylab(input$sctplot_y) + ggtitle(splot_title) + theme(plot.title = element_text(face = "bold")) + 
       scale_x_continuous(labels = comma) + scale_y_continuous(labels = comma) + theme(plot.margin = unit(c(1,4,1,1), "cm"))
-    ggplotly(scatterplot) %>% config(modeBarButtonsToRemove = c("zoom2d", "pan2d", "zoomIn2d", "zoomOut2d", "autoScale2d", "sendDataToCloud"), collaborate = FALSE, displaylogo = FALSE)
+    ggplotly(scatterplot, tooltip = "text") %>% config(modeBarButtonsToRemove = c("zoom2d", "pan2d", "zoomIn2d", "zoomOut2d", "autoScale2d", "sendDataToCloud"), collaborate = FALSE, displaylogo = FALSE)
   })
   
   #Dropdown menues for Box and Whisker plot
@@ -111,22 +119,47 @@ shinyServer(function(input, output) {
   output$bandwplot_col <- renderUI({
     selectInput("bandwplot_col", "Select the group to colour on:", names(st_data_sheet), selected = "Well Position")
   })
+  output$bandwplot_usecol <- renderUI({
+    checkboxInput("bandwplot_usecol", "Do you want to colour the data?", value = TRUE)
+  })
   
   #Box and Whisker plot
   output$bandwplot <- renderPlotly({
     
     bandwplot_factor <- as.factor(unlist(subset(st_data_sheet, select = input$bandwplot_factor)))
     bandwplot_data <- as.numeric(unlist(subset(st_data_sheet, select = input$bandwplot_data)))
-    bandwplot_colour <- as.factor(unlist(subset(st_data_sheet, select = input$bandwplot_col)))
+    bandwplot_lab <- switch(as.character(input$bandwplot_usecol),
+                            "FALSE" = input$bandwplot_factor,
+                            "TRUE" = input$bandwplot_col
+                            )
     bandwplot_title <- paste("Box and Whisker Plot Showing ", input$bandwplot_data, " for ", input$bandwplot_factor, ".", sep="")
     
+    bandwplot_colour <- switch(as.character(input$bandwplot_usecol),
+                               "FALSE" = as.factor(unlist(subset(st_data_sheet, select = input$bandwplot_factor))),
+                               "TRUE" = as.factor(unlist(subset(st_data_sheet, select = input$bandwplot_col)))
+    )
+    
+    bandwplot_xlab <- paste(levels(bandwplot_factor), "\nN=",table(bandwplot_factor, useNA = "no"), sep="")
+    
     bandwplot <- aes(bandwplot_factor, bandwplot_data, color = bandwplot_colour)
-    bandwplot <- ggplot(st_data_sheet, bandwplot) + geom_boxplot() + ggtitle(bandwplot_title) + xlab(input$bandwplot_factor) +
+    bandwplot <- ggplot(st_data_sheet, bandwplot) + geom_boxplot() + ggtitle(bandwplot_title) + xlab(input$bandwplot_factor) + scale_x_discrete(labels=bandwplot_xlab) +
       ylab(input$bandwplot_data) + theme(plot.title = element_text(face = "bold"), text = element_text(margin = margin())) + scale_y_continuous(labels = comma) + 
-      labs(colour = input$bandwplot_col) + theme(plot.margin = unit(c(1,4,1,1), "cm")) +
-      stat_summary(fun.data = give.n, geom = "text", fun.y = median, position=position_dodge(width=0.75))
+      labs(colour = bandwplot_lab) + theme(plot.margin = unit(c(1,4,1,1), "cm")) +
+      stat_summary(fun.data = give.n, geom = "text", fun.y = median, position=position_dodge(width=0.70))
     ggplotly(bandwplot) %>% config(modeBarButtonsToRemove = c("zoom2d", "pan2d", "zoomIn2d", "zoomOut2d", "autoScale2d", "sendDataToCloud"), collaborate = FALSE, displaylogo = FALSE) %>% layout(boxmode = "group")
   })  
-
+  
+  #Table that shows number of observations in each factor
+  output$factor_table <- renderTable({table(as.factor(unlist(subset(st_data_sheet, select = input$bandwplot_factor))))})
+  
+  output$factor_anova <- renderTable({
+    anova_data <- as.numeric(unlist(subset(st_data_sheet, select = input$bandwplot_data)))
+    anova_factor <- as.factor(unlist(subset(st_data_sheet, select = input$bandwplot_factor)))
+    anova_aov <- aov(anova_data ~ anova_factor)
+    anova_posthoc <- TukeyHSD(anova_aov)
+    anova_posthoc_data <- as.data.frame(anova_posthoc$anova_factor)
+    rownames(anova_posthoc_data) <- rownames(anova_posthoc$anova_factor)
+    anova_posthoc_data
+  }, rownames = TRUE)
   
 })
