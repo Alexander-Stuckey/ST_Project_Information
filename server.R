@@ -127,7 +127,11 @@ shinyServer(function(input, output) {
   output$bandwplot <- renderPlotly({
     
     bandwplot_factor <- as.factor(unlist(subset(st_data_sheet, select = input$bandwplot_factor)))
-    bandwplot_data <- as.numeric(unlist(subset(st_data_sheet, select = input$bandwplot_data)))
+    bandwplot_data <- switch(input$anova_norm_check,
+                            "No" = as.numeric(unlist(subset(st_data_sheet, select = input$bandwplot_data))),
+                            "Yes" = as.numeric(unlist(subset(st_data_sheet, select = input$bandwplot_data)))/as.numeric(unlist(subset(st_data_sheet, select = input$anova_norm)))
+    )
+    
     bandwplot_lab <- switch(as.character(input$bandwplot_usecol),
                             "FALSE" = input$bandwplot_factor,
                             "TRUE" = input$bandwplot_col
