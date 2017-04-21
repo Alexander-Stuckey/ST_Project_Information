@@ -20,6 +20,7 @@ require("devtools")
 require("Cairo")
 require("plotly")
 require("ggplot2")
+require("DT")
 
 header <- dashboardHeader(title = "ST Project Information"
                           )
@@ -84,8 +85,8 @@ body <- dashboardBody(
           fluidRow(
             box(width = "auto", plotlyOutput("bandwplot")),
             box(width = "auto", column(width = 6, uiOutput("anova_norm_check")), column(width = 6, uiOutput("anova_norm"))), 
-                column(width = 12, box(width = 6, title = "Number of observations", tableOutput("factor_table")), 
-                       box(width = 6, title = "TukeyHSD showing significant differences between comparisons", tableOutput("factor_anova")))
+                column(width = 12, box(width = 3, title = "Number of observations", tableOutput("factor_table")), 
+                       box(width = 9, title = "TukeyHSD showing significant differences between comparisons", DT::dataTableOutput("factor_anova")))
           )
         )
       )

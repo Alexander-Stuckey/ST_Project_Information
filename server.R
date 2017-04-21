@@ -20,6 +20,7 @@ require("devtools")
 require("Cairo")
 require("plotly")
 require("ggplot2")
+require("DT")
 
 
 ST <- gs_title("ST Project Information")
@@ -164,7 +165,7 @@ shinyServer(function(input, output) {
   #Table that shows number of observations in each factor
   output$factor_table <- renderTable({table(as.factor(unlist(subset(st_data_sheet, select = input$bandwplot_factor))))})
   
-  output$factor_anova <- renderTable({
+  output$factor_anova <- DT::renderDataTable({
     
     anova_data <- switch(input$anova_norm_check,
       "No" = as.numeric(unlist(subset(st_data_sheet, select = input$bandwplot_data))),
@@ -175,8 +176,7 @@ shinyServer(function(input, output) {
     anova_aov <- aov(anova_data ~ anova_factor)
     anova_posthoc <- TukeyHSD(anova_aov)
     anova_posthoc_data <- as.data.frame(anova_posthoc$anova_factor)
-    rownames(anova_posthoc_data) <- rownames(anova_posthoc$anova_factor)
-    anova_posthoc_data
-  }, rownames = TRUE)
+    datatable(anova_posthoc_data) %>% formatStyle("p adj", backgroundColor = styleInterval(0.05, c("yellow", "white")))
+  })
   
 })
