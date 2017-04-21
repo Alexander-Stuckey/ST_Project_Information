@@ -149,11 +149,24 @@ shinyServer(function(input, output) {
     ggplotly(bandwplot) %>% config(modeBarButtonsToRemove = c("zoom2d", "pan2d", "zoomIn2d", "zoomOut2d", "autoScale2d", "sendDataToCloud"), collaborate = FALSE, displaylogo = FALSE) %>% layout(boxmode = "group")
   })  
   
+  #Normalisation for ANOVA
+  output$anova_norm_check <- renderUI({
+    radioButtons("anova_norm_check", "Do you want to normalise the data for the ANOVA?", choices = c("Yes", "No"), selected = "No", inline = TRUE)
+  })
+  output$anova_norm <- renderUI({
+    selectInput("anova_norm", "Choose how to normalise the data:", names(st_data_sheet), selected = "Number of Raw Reads")
+  })
+  
   #Table that shows number of observations in each factor
   output$factor_table <- renderTable({table(as.factor(unlist(subset(st_data_sheet, select = input$bandwplot_factor))))})
   
   output$factor_anova <- renderTable({
-    anova_data <- as.numeric(unlist(subset(st_data_sheet, select = input$bandwplot_data)))
+    
+    anova_data <- switch(input$anova_norm_check,
+      "No" = as.numeric(unlist(subset(st_data_sheet, select = input$bandwplot_data))),
+      "Yes" = as.numeric(unlist(subset(st_data_sheet, select = input$bandwplot_data)))/as.numeric(unlist(subset(st_data_sheet, select = input$anova_norm)))
+    )
+      
     anova_factor <- as.factor(unlist(subset(st_data_sheet, select = input$bandwplot_factor)))
     anova_aov <- aov(anova_data ~ anova_factor)
     anova_posthoc <- TukeyHSD(anova_aov)
