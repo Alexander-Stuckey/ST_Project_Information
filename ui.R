@@ -32,7 +32,7 @@ sidebar <- dashboardSidebar(
         "
         $(document).ready(function(){
           // Bind classes to menu items, easiet to fill in manually
-          var ids = ['Scatterplots','Box_and_Whisker_plots','raw_data'];
+          var ids = ['Subsets','Scatterplots','Box_and_Whisker_plots','raw_data'];
           for(i=0; i<ids.length; i++){
             $('a[data-value='+ids[i]+']').addClass('my_subitem_class');
           }
@@ -48,6 +48,7 @@ sidebar <- dashboardSidebar(
     )
   ),
   actionButton("refresh_data", "Fetch Updated Data"),
+  menuItem("Subsets", tabName = "Subsets", icon = icon("th")),
   menuItem("Scatterplots", tabName = "Scatterplots", icon = icon("bar-chart")),
   menuItem("Box and Whisker plots", tabName = "Box_and_Whisker_plots", icon = icon("bar-chart")),
   menuItem("Raw Data", tabName = "raw_data", icon = icon("table"))
@@ -60,6 +61,12 @@ body <- dashboardBody(
   p("To make sure that the data you are viewing is up to date, click the \"Fetch Updated Data\" button on the sidebar."),
   p("If you have entered new data into the spreadsheet after opening this app, clicking the button will fetch the data."),
   tabItems(
+    tabItem(tabName = "Subsets",
+      fluidRow(
+        box(title = "Subsets", width = "auto", column(width = 6, uiOutput("subset_ddmenu")), column(width=6, uiOutput("subset_checkboxes"))),
+        box(title = "Subsetted Data", width = "auto", DT::dataTableOutput("subset_st_data"))
+      )
+    ),
     tabItem(tabName = "Scatterplots",
       fluidRow(
         box(title = "Scatterplots", width = "auto",
@@ -93,7 +100,7 @@ body <- dashboardBody(
     ),
     tabItem(tabName = "raw_data",
             fluidRow(
-              box(width = 12, div(style = 'overflow-x: scroll', tableOutput("raw_data"))))
+              box(width = 12, div(style = 'overflow-x: scroll', DT::dataTableOutput("raw_data"))))
     )
   )
 )
