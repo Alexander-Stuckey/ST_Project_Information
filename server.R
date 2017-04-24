@@ -63,7 +63,7 @@ shinyServer(function(input, output) {
   st_data_subset <- reactive({
     if (length(input$subset_checkboxes) > 0 ){
       match_strings <- paste(input$subset_checkboxes, collapse = "|")
-      st_data_sheet[grep(match_strings, as.character(unlist(subset(st_data_sheet, select = input$subset_ddmenu))), fixed = TRUE),]
+      st_data_sheet[grep(match_strings, as.character(unlist(subset(st_data_sheet, select = input$subset_ddmenu)))),]
     } else {
       st_data_sheet
     }
