@@ -27,10 +27,8 @@ ST <- gs_title("ST Project Information")
 
 give.n <- function(x){
   return(c(y = 0, label = length(x))) 
-  # experiment with the multiplier to find the perfect position
 }
 
-# Define server logic required to draw a histogram
 shinyServer(function(input, output) {
    
 
@@ -69,7 +67,23 @@ shinyServer(function(input, output) {
     }
   })
   output$subset_st_data <- DT::renderDataTable({st_data_subset()})
-  
+
+  #Inputs to download the current subset as a csv file
+  #output$dl_subset_csv <- renderUI({
+  #  downloadButton("dl_subset_csv", label = "Download subset as .csv file")
+  #})
+  #output$dl_filename_csv <- renderUI({
+  #  textInput("dl_filename", label = "Enter a filename", placeholder = "subset_data")
+  #})
+  output$dl_csv_data <- downloadHandler(
+    filename = function() {
+      paste(input$dl_filename, ".csv", sep="")
+    },
+    content = function(file) {
+      write.csv(st_data_subset(), file)
+    }
+  )
+    
   #Write raw information out to table
   output$raw_data <- DT::renderDataTable({st_data_sheet})
   

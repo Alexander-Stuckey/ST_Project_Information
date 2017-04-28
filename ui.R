@@ -64,6 +64,9 @@ body <- dashboardBody(
     tabItem(tabName = "Subsets",
       fluidRow(
         box(title = "Subsets", width = "auto", column(width = 6, uiOutput("subset_ddmenu")), column(width=6, uiOutput("subset_checkboxes"))),
+        box(title = "Download", width = "auto", 
+            column(width = 6, downloadButton("dl_csv_data", label = "Download subset as .csv file")),
+            column(width = 6, textInput("dl_filename", label = "Enter a filename", value = "subset_data"))),
         box(title = "Subsetted Data", width = "auto", DT::dataTableOutput("subset_st_data"))
       )
     ),
