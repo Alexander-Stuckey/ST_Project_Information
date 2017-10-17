@@ -6,8 +6,6 @@
 # 
 #    http://shiny.rstudio.com/
 #
-#setwd("~/ST_project_information/")
-#source("load_libraries.R")
 
 
 require("googlesheets")
@@ -68,13 +66,7 @@ shinyServer(function(input, output) {
   })
   output$subset_st_data <- DT::renderDataTable({st_data_subset()})
 
-  #Inputs to download the current subset as a csv file
-  #output$dl_subset_csv <- renderUI({
-  #  downloadButton("dl_subset_csv", label = "Download subset as .csv file")
-  #})
-  #output$dl_filename_csv <- renderUI({
-  #  textInput("dl_filename", label = "Enter a filename", placeholder = "subset_data")
-  #})
+  #Download the current subset as a csv file
   output$dl_csv_data <- downloadHandler(
     filename = function() {
       paste(input$dl_filename, ".csv", sep="")
@@ -142,6 +134,23 @@ shinyServer(function(input, output) {
       scale_x_continuous(labels = comma) + scale_y_continuous(labels = comma) + theme(plot.margin = unit(c(1,4,1,1), "cm"))
     ggplotly(scatterplot, tooltip = "text") %>% config(modeBarButtonsToRemove = c("zoom2d", "pan2d", "zoomIn2d", "zoomOut2d", "autoScale2d", "sendDataToCloud"), collaborate = FALSE, displaylogo = FALSE)
   })
+  
+  #Filetype to save plot as
+  output$splot_ft <- renderUI({
+    radioButtons("file_type", label = "Choose the output filetype", choiceNames = list("png", "pdf"), choiceValues = list("png", "pdf"), inline = TRUE)
+  })
+  
+  #Download the current plot
+  output$splot_dl <- downloadHandler(
+    filename = function() {
+      paste("name", as.character(input$splot_ft), sep=".")
+    },
+    content = function(file) {
+      #ggsave(file, plot = scatterplot(), device = input$splot_ft)
+      #savePlot(file, type = input$splot_ft)
+      export(p = scatterplot(), file = "test.png")
+    }
+  )
   
   #Dropdown menues for Box and Whisker plot
   output$bandwplot_factor <- renderUI({

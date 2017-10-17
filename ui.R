@@ -6,8 +6,6 @@
 # 
 #    http://shiny.rstudio.com/
 #
-#setwd("~/ST_project_information/")
-#source("load_libraries.R")
 
 
 require("googlesheets")
@@ -22,8 +20,7 @@ require("plotly")
 require("ggplot2")
 require("DT")
 
-header <- dashboardHeader(title = "ST Project Information"
-                          )
+header <- dashboardHeader(title = "ST Project Information")
 
 sidebar <- dashboardSidebar(
   tags$head(
@@ -74,6 +71,8 @@ body <- dashboardBody(
       fluidRow(
         box(title = "Scatterplots", width = "auto",
           fluidRow(
+            box(width = "auto", column(width = 6, uiOutput("splot_ft")),
+                column(width = 6, downloadButton("splot_dl", label = "Save plot"))),
             box(width = 4, column(width = 12, uiOutput("splot_y")), column(width = 12, uiOutput("splot_x"))),
             box(width = 4, column(width = 12, uiOutput("splot_col")), column(width = 12, uiOutput("splot_shape"))),
             box(width = 4, column(width = 12, uiOutput("splot_norm_check")), column(width = 12, uiOutput("splot_norm")), column(width = 12, uiOutput("splot_norm_scale")))
