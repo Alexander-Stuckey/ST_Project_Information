@@ -21,7 +21,7 @@ require("ggplot2")
 require("DT")
 
 
-ST <- gs_title("ST Project Information")
+ST <- gs_url("https://docs.google.com/spreadsheets/d/18CmRPdJjxcaH7_FmKBdUYlW2-Y5DZJZdE2xvZepX1dk/edit#gid=0")
 
 give.n <- function(x){
   return(c(y = 0, label = length(x))) 
